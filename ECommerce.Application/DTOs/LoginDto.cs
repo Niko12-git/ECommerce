@@ -1,0 +1,7 @@
+﻿namespace ECommerce.Application.DTOs;
+
+public class LoginDto //Email y password para iniciar sesión
+{
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+}
