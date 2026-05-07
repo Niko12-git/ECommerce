@@ -1,0 +1,141 @@
+﻿@page "/dashboard"
+@inject DashboardService DashboardService
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+
+<h2>📊 Panel de Administración</h2>
+
+@if (isLoading)
+{
+    <div class="loading-spinner">Cargando estadísticas...</div>
+}
+else if (stats is null)
+{
+    <div class="alert-error">Error al cargar las estadísticas.</div>
+}
+else
+{
+    <!-- Tarjetas de estadísticas -->
+    <div class="stats-grid">
+        <div class="stat-card stat-blue">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+                <div class="stat-value">@stats.TotalUsers</div>
+                <div class="stat-label">Usuarios totales</div>
+                <div class="stat-sub">@stats.ActiveUsers activos</div>
+            </div>
+        </div>
+
+        <div class="stat-card stat-purple">
+            <div class="stat-icon">📦</div>
+            <div class="stat-info">
+                <div class="stat-value">@stats.TotalProducts</div>
+                <div class="stat-label">Productos</div>
+                <div class="stat-sub @(stats.LowStockProducts > 0 ? "text-warning" : "")">
+                    @if (stats.LowStockProducts > 0)
+                    {
+                        <span>⚠️ @stats.LowStockProducts con bajo stock</span>
+                    }
+                    else
+                    {
+                        <span>Stock saludable</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card stat-green">
+            <div class="stat-icon">🛒</div>
+            <div class="stat-info">
+                <div class="stat-value">@stats.TotalOrders</div>
+                <div class="stat-label">Órdenes totales</div>
+                <div class="stat-sub">@stats.PendingOrders pendientes</div>
+            </div>
+        </div>
+
+        <div class="stat-card stat-gold">
+            <div class="stat-icon">💰</div>
+            <div class="stat-info">
+                <div class="stat-value">$@stats.TotalRevenue.ToString("N0")</div>
+                <div class="stat-label">Ingresos totales</div>
+                <div class="stat-sub">Todas las órdenes</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Órdenes recientes -->
+    <div class="card" style="margin-top:2rem">
+        <h3 style="margin-bottom:1rem">🕐 Órdenes Recientes</h3>
+        @if (stats.RecentOrders.Count == 0)
+        {
+            <p style="color:#888">No hay órdenes aún.</p>
+        }
+        else
+        {
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Orden #</th>
+                        <th>Cliente ID</th>
+                        <th>Estado</th>
+                        <th>Fecha</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in stats.RecentOrders)
+                    {
+                        <tr>
+                            <td><strong>#@order.Id</strong></td>
+                            <td>@order.CustomerId</td>
+                            <td>
+                                <span class="@GetStatusClass(order.Status)">
+                                    @order.Status
+                                </span>
+                            </td>
+                            <td>@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td><strong>$@order.Total.ToString("N0")</strong></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+}
+
+@code {
+    private DashboardStats? stats;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthService.InitializeAsync();
+
+        if (!await AuthService.IsAuthenticatedAsync())
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        var role = await AuthService.GetUserRoleAsync();
+        if (role != "Admin")
+        {
+            Navigation.NavigateTo("/products");
+            return;
+        }
+
+        stats = await DashboardService.GetStatsAsync();
+        isLoading = false;
+    }
+
+    private string GetStatusClass(string status) => status switch
+    {
+        "Pending" => "badge-pending",
+        "Confirmed" => "badge-active",
+        "Shipped" => "badge-shipped",
+        "Delivered" => "badge-active",
+        "Cancelled" => "badge-inactive",
+        _ => "badge-active"
+    };
+}

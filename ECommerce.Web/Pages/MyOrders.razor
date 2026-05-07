@@ -1,0 +1,84 @@
+@page "/my-orders"
+@inject OrderService OrderService
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+<h2>Mis órdenes</h2>
+
+@if (isLoading)
+{
+    <p>Cargando órdenes...</p>
+}
+else if (orders.Count == 0)
+{
+    <div class="empty-cart">
+        <p>No tienes órdenes todavía</p>
+        <a href="/products" class="btn-primary"
+            style="display:inline-block;width:auto;padding:0.6rem 1.5rem;text-decoration:none">
+            Ir a comprar
+        </a>
+    </div>
+}
+else
+{
+    @foreach (var order in orders)
+    {
+        <div class="card" style="margin-bottom:1.2rem">
+            <div class="order-header">
+                <span><strong>Orden #@order.Id</strong></span>
+                <span class="badge-active">@order.Status</span>
+                <span style="color:#888;font-size:0.9rem">
+                    @order.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                </span>
+            </div>
+
+            <table class="data-table" style="margin-top:0.8rem">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio unit.</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in order.Items)
+                    {
+                        <tr>
+                            <td>@item.ProductName</td>
+                            <td>@item.Quantity</td>
+                            <td>$@item.UnitPrice.ToString("F2")</td>
+                            <td>$@item.Subtotal.ToString("F2")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div style="text-align:right;margin-top:0.8rem;font-size:1.1rem">
+                Total: <strong>$@order.Total.ToString("F2")</strong>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    private List<OrderResponseDto> orders = new();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthService.InitializeAsync();
+
+        if (!await AuthService.IsAuthenticatedAsync())
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        var customerId = await AuthService.GetUserIdAsync();
+        if (customerId > 0)
+            orders = await OrderService.GetMyOrdersAsync(customerId);
+
+        isLoading = false;
+    }
+}

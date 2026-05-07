@@ -2,13 +2,9 @@
 @inject UserService UserService
 @inject AuthService AuthService
 @inject NavigationManager Navigation
+@inject ToastService ToastService
 
-<h2>👥 Gestión de Usuarios</h2>
-
-@if (!string.IsNullOrEmpty(message))
-{
-    <div class="alert-success">@message</div>
-}
+<h2>Gestión de usuarios</h2>
 
 @if (isLoading)
 {
@@ -65,7 +61,6 @@ else
 
 @code {
     private List<UserModel> users = new();
-    private string message = string.Empty;
     private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
@@ -98,14 +93,14 @@ else
     private async Task HandleDelete(int id)
     {
         await UserService.DeleteAsync(id);
-        message = "Usuario desactivado";
+        ToastService.ShowSuccess("Usuario desactivado correctamente");
         await LoadUsers();
     }
 
     private async Task HandleActivate(int id)
     {
         await UserService.ActivateAsync(id);
-        message = "Usuario activado";
+        ToastService.ShowSuccess("Usuario activado correctamente");
         await LoadUsers();
     }
 }

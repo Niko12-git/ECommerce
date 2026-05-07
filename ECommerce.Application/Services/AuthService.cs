@@ -46,6 +46,7 @@ public class AuthService : IAuthService
 
         return new AuthResponseDto
         {
+            UserId = user.Id,
             Token = token,
             Name = user.Name,
             Email = user.Email,
@@ -78,6 +79,7 @@ public class AuthService : IAuthService
 
         return new AuthResponseDto
         {
+            UserId = user.Id,
             Token = token,
             Name = user.Name,
             Email = user.Email,
@@ -122,7 +124,7 @@ public class AuthService : IAuthService
         var user = await _userRepo.GetByIdAsync(id)
             ?? throw new InvalidOperationException("Usuario no encontrado");
 
-        // Verificar que el nuevo email no lo tenga otro usuario
+        // Verifica que el nuevo email no lo tenga otro usuario
         if (user.Email != dto.Email && await _userRepo.ExistsAsync(dto.Email))
             throw new InvalidOperationException("El email ya está en uso");
 
@@ -149,4 +151,5 @@ public class AuthService : IAuthService
         user.Activate();
         await _userRepo.UpdateAsync(user);
     }
+    
 }

@@ -30,4 +30,9 @@ public class OrderRepository : IOrderRepository
         _ctx.Orders.Add(order);
         await _ctx.SaveChangesAsync();
     }
+    
+    public async Task<IEnumerable<Order>> GetAllAsync()
+        => await _ctx.Orders
+            .Include(o => o.Items)
+            .ToListAsync();
 }

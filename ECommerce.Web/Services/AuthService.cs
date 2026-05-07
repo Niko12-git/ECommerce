@@ -29,7 +29,8 @@ public class AuthService
         await _localStorage.SetItemAsync("userName", result.Name);
         await _localStorage.SetItemAsync("userRole", result.Role);
         await _localStorage.SetItemAsync("userEmail", result.Email);
-
+        await _localStorage.SetItemAsync("userId", result.UserId.ToString());
+        
         // Agregar el token a todas las peticiones futuras
         _http.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", result.Token);
@@ -49,7 +50,8 @@ public class AuthService
         await _localStorage.SetItemAsync("userName", result.Name);
         await _localStorage.SetItemAsync("userRole", result.Role);
         await _localStorage.SetItemAsync("userEmail", result.Email);
-
+        await _localStorage.SetItemAsync("userId", result.UserId.ToString());
+        
         _http.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", result.Token);
 
@@ -86,4 +88,14 @@ public class AuthService
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
         }
     }
+    public async Task<string> GetUserEmailAsync()
+        => await _localStorage.GetItemAsync<string>("userEmail") ?? string.Empty;
+    
+    public async Task<int> GetUserIdAsync()
+    {
+        var id = await _localStorage.GetItemAsync<string>("userId");
+        return int.TryParse(id, out var userId) ? userId : 0;
+    }
+    
 }
+

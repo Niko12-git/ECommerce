@@ -18,5 +18,9 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<OrderService>();
+builder.Services.AddSingleton<CartService>();
+builder.Services.AddSingleton<ToastService>();
+builder.Services.AddScoped<DashboardService>();
 
 await builder.Build().RunAsync();

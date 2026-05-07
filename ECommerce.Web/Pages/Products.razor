@@ -1,14 +1,11 @@
 ﻿@page "/products"
 @inject ProductService ProductService
 @inject AuthService AuthService
+@inject CartService CartService
+@inject ToastService ToastService
 @inject NavigationManager Navigation
 
 <h2>🛍️ Productos</h2>
-
-@if (!string.IsNullOrEmpty(successMessage))
-{
-    <div class="alert-success">@successMessage</div>
-}
 
 @if (userRole == "Admin")
 {
@@ -49,6 +46,18 @@ else
                 <div class="product-name">@product.Name</div>
                 <div class="product-price">$@product.Price.ToString("F2")</div>
                 <div class="product-stock">Stock: @product.Stock</div>
+                <button class="btn-add-cart"
+                    @onclick="() => AddToCart(product)"
+                    disabled="@(product.Stock == 0)">
+                    @if (product.Stock == 0)
+                    {
+                        <span>Sin stock</span>
+                    }
+                    else
+                    {
+                        <span>🛒 Agregar</span>
+                    }
+                </button>
             </div>
         }
     </div>
@@ -57,7 +66,6 @@ else
 @code {
     private List<ProductModel> products = new();
     private CreateProductModel newProduct = new();
-    private string successMessage = string.Empty;
     private string userRole = string.Empty;
     private bool isLoading = true;
 
@@ -87,9 +95,19 @@ else
         var success = await ProductService.CreateAsync(newProduct);
         if (success)
         {
-            successMessage = "Producto creado correctamente";
+            ToastService.ShowSuccess("Producto creado correctamente");
             newProduct = new CreateProductModel();
             await LoadProducts();
         }
+        else
+        {
+            ToastService.ShowError("Error al crear el producto");
+        }
+    }
+
+    private void AddToCart(ProductModel product)
+    {
+        CartService.AddItem(product);
+        ToastService.ShowSuccess($"'{product.Name}' agregado al carrito");
     }
 }

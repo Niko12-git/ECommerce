@@ -1,11 +1,13 @@
-﻿using ECommerce.Application.DTOs;
-using ECommerce.Application.Services;
+﻿using ECommerce.Application.Services;
+using ECommerce.Application.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class OrdersController : ControllerBase
 {
     private readonly OrderService _service;
@@ -18,8 +20,15 @@ public class OrdersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(CreateOrderDto dto)
     {
-        var order = await _service.CreateOrderAsync(dto);
-        return Ok(order);
+        try
+        {
+            var order = await _service.CreateOrderAsync(dto);
+            return Ok(order);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpGet("{id}")]
@@ -27,5 +36,20 @@ public class OrdersController : ControllerBase
     {
         var order = await _service.GetOrderAsync(id);
         return order is null ? NotFound() : Ok(order);
+    }
+
+    [HttpGet("my-orders/{customerId}")]
+    public async Task<IActionResult> GetMyOrders(int customerId)
+    {
+        var orders = await _service.GetOrdersByCustomerDtoAsync(customerId);
+        return Ok(orders);
+    }
+
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetAll()
+    {
+        var orders = await _service.GetAllOrdersDtoAsync();
+        return Ok(orders);
     }
 }

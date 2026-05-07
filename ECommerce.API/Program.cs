@@ -41,6 +41,7 @@ builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<DashboardService>();
 
 // PasswordHasher — encripta y verifica contraseñas
 builder.Services.AddScoped<IPasswordHasher<ECommerce.Domain.Entities.User>,
@@ -69,7 +70,15 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAuthorization();
-builder.Services.AddControllers();
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Serializar enums como texto en lugar de números
+        options.JsonSerializerOptions.Converters.Add(
+            new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 
 // Swagger con soporte para JWT

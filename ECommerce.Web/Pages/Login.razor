@@ -1,16 +1,12 @@
 ﻿@page "/login"
 @inject AuthService AuthService
 @inject NavigationManager Navigation
+@inject ToastService ToastService
 
 <div class="auth-container">
     <div class="auth-card">
-        <h2>🔐 Iniciar Sesión</h2>
-
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div class="alert-error">@errorMessage</div>
-        }
-
+        <h2>Iniciar Sesión</h2>
+        
         <div class="form-group">
             <label>Email</label>
             <input type="email" @bind="model.Email" placeholder="correo@ejemplo.com" />
@@ -31,21 +27,17 @@
 
 @code {
     private LoginModel model = new();
-    private string errorMessage = string.Empty;
     private bool isLoading = false;
 
     private async Task HandleLogin()
     {
         isLoading = true;
-        errorMessage = string.Empty;
 
         var success = await AuthService.LoginAsync(model);
 
         if (success)
             Navigation.NavigateTo("/products", forceLoad: true);
         else
-            errorMessage = "Email o contraseña incorrectos";
-
-        isLoading = false;
+            ToastService.ShowError("Email o contraseña incorrectos");
     }
 }

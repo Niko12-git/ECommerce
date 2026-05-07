@@ -1,6 +1,8 @@
 ﻿@inherits LayoutComponentBase
 @inject AuthService AuthService
+@inject CartService CartService
 @inject NavigationManager Navigation
+@using ECommerce.Web.Shared
 
 <div class="layout">
     <nav class="navbar">
@@ -11,10 +13,22 @@
                 <span class="nav-user">👤 @userName (@userRole)</span>
                 @if (userRole == "Admin")
                 {
+                    <a href="/dashboard">📊 Dashboard</a>
                     <a href="/products">Productos</a>
                     <a href="/users">Usuarios</a>
                 }
-                <a href="/products">Tienda</a>
+                else
+                {
+                    <a href="/products">Tienda</a>
+                }
+                <a href="/my-orders">Mis Órdenes</a>
+                <a href="/cart" class="cart-link">
+                    🛒 Carrito
+                    @if (cartCount > 0)
+                    {
+                        <span class="cart-badge">@cartCount</span>
+                    }
+                </a>
                 <button class="btn-logout" @onclick="Logout">Cerrar sesión</button>
             }
             else
@@ -28,12 +42,15 @@
     <main class="main-content">
         @Body
     </main>
+
+    <ToastContainer />
 </div>
 
 @code {
     private bool isAuthenticated;
     private string userName = string.Empty;
     private string userRole = string.Empty;
+    private int cartCount = 0;
 
     protected override async Task OnInitializedAsync()
     {
@@ -44,11 +61,26 @@
             userName = await AuthService.GetUserNameAsync();
             userRole = await AuthService.GetUserRoleAsync();
         }
+
+        CartService.OnCartChanged += UpdateCartCount;
+        UpdateCartCount();
+    }
+
+    private void UpdateCartCount()
+    {
+        cartCount = CartService.TotalItems;
+        InvokeAsync(StateHasChanged);
     }
 
     private async Task Logout()
     {
+        CartService.Clear();
         await AuthService.LogoutAsync();
         Navigation.NavigateTo("/login", forceLoad: true);
+    }
+
+    public void Dispose()
+    {
+        CartService.OnCartChanged -= UpdateCartCount;
     }
 }

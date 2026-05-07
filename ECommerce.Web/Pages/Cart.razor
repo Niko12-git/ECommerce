@@ -1,0 +1,160 @@
+@page "/cart"
+@inject CartService CartService
+@inject OrderService OrderService
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@inject ToastService ToastService
+
+<h2>Mi carrito</h2>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert-error">@errorMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert-success">@successMessage</div>
+}
+
+@if (CartService.Items.Count == 0)
+{
+    <div class="empty-cart">
+        <p>Tu carrito está vacío</p>
+        <a href="/products" class="btn-primary" style="display:inline-block;width:auto;padding:0.6rem 1.5rem;text-decoration:none">
+            Ver productos
+        </a>
+    </div>
+}
+else
+{
+    <div class="card" style="margin-bottom:1.5rem">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio unitario</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in CartService.Items)
+                {
+                    <tr>
+                        <td>@item.ProductName</td>
+                        <td>$@item.UnitPrice.ToString("F2")</td>
+                        <td>
+                            <div class="quantity-control">
+                                <button class="qty-btn"
+                                    @onclick="() => Decrease(item.ProductId)">−</button>
+                                <span class="qty-value">@item.Quantity</span>
+                                <button class="qty-btn"
+                                    @onclick="() => Increase(item.ProductId)">+</button>
+                            </div>
+                        </td>
+                        <td><strong>$@item.Subtotal.ToString("F2")</strong></td>
+                        <td>
+                            <button class="btn-danger"
+                                @onclick="() => Remove(item.ProductId)">
+                                Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="cart-summary">
+        <div class="cart-total">
+            Total: <strong>$@CartService.Total.ToString("F2")</strong>
+        </div>
+        <div class="cart-actions">
+            <a href="/products" class="btn-secondary">Seguir comprando</a>
+            <button class="btn-primary" style="width:auto;padding:0.6rem 1.5rem"
+                @onclick="HandleCheckout" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <span>Procesando...</span>
+                }
+                else
+                {
+                    <span>Confirmar compra</span>
+                }
+            </button>
+        </div>
+    </div>
+}
+
+@code {
+    private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
+    private bool isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthService.InitializeAsync();
+        if (!await AuthService.IsAuthenticatedAsync())
+            Navigation.NavigateTo("/login");
+    }
+
+    private void Increase(int productId)
+    {
+        var item = CartService.Items.FirstOrDefault(i => i.ProductId == productId);
+        if (item is not null)
+            CartService.UpdateQuantity(productId, item.Quantity + 1);
+    }
+
+    private void Decrease(int productId)
+    {
+        var item = CartService.Items.FirstOrDefault(i => i.ProductId == productId);
+        if (item is not null)
+            CartService.UpdateQuantity(productId, item.Quantity - 1);
+    }
+
+    private void Remove(int productId)
+        => CartService.RemoveItem(productId);
+
+    private async Task HandleCheckout()
+    {
+        isLoading = true;
+        errorMessage = string.Empty;
+
+        var customerId = await AuthService.GetUserIdAsync();
+
+        if (customerId == 0)
+        {
+            errorMessage = "Error al obtener el usuario. Intenta iniciar sesión de nuevo.";
+            isLoading = false;
+            return;
+        }
+
+        var order = new CreateOrderModel
+        {
+            CustomerId = customerId,
+            Items = CartService.Items.Select(i => new OrderItemModel
+            {
+                ProductId = i.ProductId,
+                Quantity = i.Quantity
+            }).ToList()
+        };
+
+        var success = await OrderService.CreateOrderAsync(order);
+
+        if (success)
+        {
+            CartService.Clear();
+            ToastService.ShowSuccess("¡Orden creada correctamente!");
+            await Task.Delay(1500);
+            Navigation.NavigateTo("/my-orders");
+        }
+        else
+        {
+            ToastService.ShowError("Error al procesar la orden. Verifica el stock disponible.");
+        }
+
+        isLoading = false;
+    }
+}

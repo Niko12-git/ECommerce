@@ -1,0 +1,75 @@
+﻿@inject ToastService ToastService
+@implements IDisposable
+
+<div class="toast-container">
+    @foreach (var toast in toasts)
+    {
+        <div class="toast toast-@toast.Type.ToString().ToLower() @(toast.IsVisible ? "toast-show" : "toast-hide")">
+            <span class="toast-icon">
+                @switch (toast.Type)
+                {
+                    case ToastType.Success: <span>✅</span> break;
+                    case ToastType.Error: <span>❌</span> break;
+                    case ToastType.Warning: <span>⚠️</span> break;
+                    default: <span>ℹ️</span> break;
+                }
+            </span>
+            <span class="toast-message">@toast.Message</span>
+            <button class="toast-close" @onclick="() => Remove(toast.Id)">×</button>
+        </div>
+    }
+</div>
+
+@code {
+    private List<ToastItem> toasts = new();
+
+    protected override void OnInitialized()
+    {
+        ToastService.OnShow += ShowToast;
+    }
+
+    private async void ShowToast(ToastMessage message)
+    {
+        var item = new ToastItem
+        {
+            Id = message.Id,
+            Message = message.Message,
+            Type = message.Type,
+            IsVisible = true
+        };
+
+        toasts.Add(item);
+        await InvokeAsync(StateHasChanged);
+
+        // Desaparecer después de 3 segundos
+        await Task.Delay(3000);
+        item.IsVisible = false;
+        await InvokeAsync(StateHasChanged);
+
+        // Eliminar de la lista después de la animación
+        await Task.Delay(400);
+        toasts.Remove(item);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void Remove(string id)
+    {
+        var toast = toasts.FirstOrDefault(t => t.Id == id);
+        if (toast is not null)
+            toasts.Remove(toast);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        ToastService.OnShow -= ShowToast;
+    }
+
+    private class ToastItem
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public ToastType Type { get; set; }
+        public bool IsVisible { get; set; }
+    }
+}
