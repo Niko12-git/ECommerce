@@ -35,5 +35,6 @@ public class OrderService
     public async Task<Order?> GetOrderAsync(int id)
         => await _orderRepo.GetByIdAsync(id);
     
+    public async Task<IEnumerable<Order>> GetOrdersByCustomerAsync(int customerId)
+        => await _orderRepo.GetByCustomerIdAsync(customerId);
 }
-

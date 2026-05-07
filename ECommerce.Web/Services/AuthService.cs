@@ -86,4 +86,8 @@ public class AuthService
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
         }
     }
+    public async Task<string> GetUserEmailAsync()
+        => await _localStorage.GetItemAsync<string>("userEmail") ?? string.Empty;
+    
 }
+

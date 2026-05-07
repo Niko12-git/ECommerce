@@ -1,5 +1,6 @@
 ﻿using ECommerce.Application.DTOs;
 using ECommerce.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.API.Controllers;
@@ -27,5 +28,13 @@ public class OrdersController : ControllerBase
     {
         var order = await _service.GetOrderAsync(id);
         return order is null ? NotFound() : Ok(order);
+    }
+    
+    [HttpGet("my-orders/{customerId}")]
+    [Authorize]
+    public async Task<IActionResult> GetMyOrders(int customerId)
+    {
+        var orders = await _service.GetOrdersByCustomerAsync(customerId);
+        return Ok(orders);
     }
 }

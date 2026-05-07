@@ -119,21 +119,140 @@ body {
 .badge-inactive { background: #fee2e2; color: #991b1b; padding: 0.25rem 0.7rem; border-radius: 20px; font-size: 0.8rem; }
 
 #blazor-error-ui {
-    background: #fee2e2; color: #991b1b;
-    padding: 0.75rem; text-align: center;
-    position: fixed; bottom: 0; width: 100%;
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 0.75rem;
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
     display: none;
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+    /* CARRITO */
+
+    .cart-link {
+        position: relative;
+    }
+
+    .cart-badge {
+        background: #ef4444;
+        color: #fff;
+        border-radius: 50%;
+        padding: 1px 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-left: 4px;
+    }
+
+    .btn-add-cart {
+        width: 100%;
+        margin-top: 0.8rem;
+        padding: 0.5rem;
+        background: #6d28d9;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background .2s;
+    }
+
+    .btn-add-cart:hover {
+        background: #5b21b6;
+    }
+
+    .btn-add-cart:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+
+    .btn-secondary {
+        padding: 0.6rem 1.5rem;
+        background: #e5e7eb;
+        color: #374151;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.95rem;
+        text-decoration: none;
+    }
+
+    .btn-secondary:hover {
+        background: #d1d5db;
+    }
+
+    .quantity-control {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .qty-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 1.5px solid #6d28d9;
+        background: transparent;
+        color: #6d28d9;
+        font-size: 1.1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .qty-btn:hover {
+        background: #6d28d9;
+        color: #fff;
+    }
+
+    .qty-value {
+        min-width: 24px;
+        text-align: center;
+        font-weight: 600;
+    }
+
+    .cart-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .cart-total {
+        font-size: 1.3rem;
+        color: #1a1a2e;
+    }
+
+    .cart-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .empty-cart {
+        text-align: center;
+        padding: 3rem;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .empty-cart p {
+        font-size: 1.1rem;
+        color: #888;
+        margin-bottom: 1.5rem;
+    }
+
+    .order-header {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
 }
