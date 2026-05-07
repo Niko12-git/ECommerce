@@ -1,0 +1,54 @@
+﻿@inherits LayoutComponentBase
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="layout">
+    <nav class="navbar">
+        <div class="nav-brand">🛒 ECommerce</div>
+        <div class="nav-links">
+            @if (isAuthenticated)
+            {
+                <span class="nav-user">👤 @userName (@userRole)</span>
+                @if (userRole == "Admin")
+                {
+                    <a href="/products">Productos</a>
+                    <a href="/users">Usuarios</a>
+                }
+                <a href="/products">Tienda</a>
+                <button class="btn-logout" @onclick="Logout">Cerrar sesión</button>
+            }
+            else
+            {
+                <a href="/login">Iniciar sesión</a>
+                <a href="/register">Registrarse</a>
+            }
+        </div>
+    </nav>
+
+    <main class="main-content">
+        @Body
+    </main>
+</div>
+
+@code {
+    private bool isAuthenticated;
+    private string userName = string.Empty;
+    private string userRole = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthService.InitializeAsync();
+        isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        if (isAuthenticated)
+        {
+            userName = await AuthService.GetUserNameAsync();
+            userRole = await AuthService.GetUserRoleAsync();
+        }
+    }
+
+    private async Task Logout()
+    {
+        await AuthService.LogoutAsync();
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+}

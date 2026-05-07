@@ -13,6 +13,19 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configuración CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("BlazorPolicy", policy =>
+    {
+        policy.WithOrigins(
+                "https://localhost:7220",
+                "http://localhost:5130")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 // Base de datos SQLite
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlite("Data Source=ecommerce.db"));
@@ -91,6 +104,7 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
+app.UseCors("BlazorPolicy");
 app.UseHttpsRedirection();
 
 // IMPORTANTE: Authentication antes que Authorization

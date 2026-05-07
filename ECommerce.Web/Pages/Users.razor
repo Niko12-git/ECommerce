@@ -1,0 +1,111 @@
+﻿@page "/users"
+@inject UserService UserService
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+<h2>👥 Gestión de Usuarios</h2>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert-success">@message</div>
+}
+
+@if (isLoading)
+{
+    <p>Cargando usuarios...</p>
+}
+else
+{
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.Name</td>
+                    <td>@user.Email</td>
+                    <td>@user.Role</td>
+                    <td>
+                        @if (user.IsActive)
+                        {
+                            <span class="badge-active">Activo</span>
+                        }
+                        else
+                        {
+                            <span class="badge-inactive">Inactivo</span>
+                        }
+                    </td>
+                    <td>
+                        @if (user.IsActive)
+                        {
+                            <button class="btn-danger" @onclick="() => HandleDelete(user.Id)">
+                                Desactivar
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn-success" @onclick="() => HandleActivate(user.Id)">
+                                Activar
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<UserModel> users = new();
+    private string message = string.Empty;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthService.InitializeAsync();
+
+        if (!await AuthService.IsAuthenticatedAsync())
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        var role = await AuthService.GetUserRoleAsync();
+        if (role != "Admin")
+        {
+            Navigation.NavigateTo("/products");
+            return;
+        }
+
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        isLoading = true;
+        users = await UserService.GetAllAsync();
+        isLoading = false;
+    }
+
+    private async Task HandleDelete(int id)
+    {
+        await UserService.DeleteAsync(id);
+        message = "Usuario desactivado";
+        await LoadUsers();
+    }
+
+    private async Task HandleActivate(int id)
+    {
+        await UserService.ActivateAsync(id);
+        message = "Usuario activado";
+        await LoadUsers();
+    }
+}

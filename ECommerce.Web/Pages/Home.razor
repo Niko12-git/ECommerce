@@ -1,0 +1,14 @@
+﻿@page "/"
+@inject NavigationManager Navigation
+@inject AuthService AuthService
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthService.InitializeAsync();
+        if (await AuthService.IsAuthenticatedAsync())
+            Navigation.NavigateTo("/products");
+        else
+            Navigation.NavigateTo("/login");
+    }
+}

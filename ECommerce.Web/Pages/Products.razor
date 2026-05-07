@@ -1,0 +1,95 @@
+﻿@page "/products"
+@inject ProductService ProductService
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+<h2>🛍️ Productos</h2>
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert-success">@successMessage</div>
+}
+
+@if (userRole == "Admin")
+{
+    <div class="card" style="margin-bottom:1.5rem">
+        <h3>Agregar Producto</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" @bind="newProduct.Name" placeholder="Nombre del producto" />
+            </div>
+            <div class="form-group">
+                <label>Precio</label>
+                <input type="number" @bind="newProduct.Price" placeholder="0.00" />
+            </div>
+            <div class="form-group">
+                <label>Stock</label>
+                <input type="number" @bind="newProduct.Stock" placeholder="0" />
+            </div>
+        </div>
+        <button class="btn-primary" @onclick="HandleCreate">Agregar Producto</button>
+    </div>
+}
+
+@if (isLoading)
+{
+    <p>Cargando productos...</p>
+}
+else if (products.Count == 0)
+{
+    <p>No hay productos disponibles.</p>
+}
+else
+{
+    <div class="products-grid">
+        @foreach (var product in products)
+        {
+            <div class="product-card">
+                <div class="product-name">@product.Name</div>
+                <div class="product-price">$@product.Price.ToString("F2")</div>
+                <div class="product-stock">Stock: @product.Stock</div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<ProductModel> products = new();
+    private CreateProductModel newProduct = new();
+    private string successMessage = string.Empty;
+    private string userRole = string.Empty;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthService.InitializeAsync();
+
+        if (!await AuthService.IsAuthenticatedAsync())
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        userRole = await AuthService.GetUserRoleAsync();
+        await LoadProducts();
+    }
+
+    private async Task LoadProducts()
+    {
+        isLoading = true;
+        products = await ProductService.GetAllAsync();
+        isLoading = false;
+    }
+
+    private async Task HandleCreate()
+    {
+        var success = await ProductService.CreateAsync(newProduct);
+        if (success)
+        {
+            successMessage = "Producto creado correctamente";
+            newProduct = new CreateProductModel();
+            await LoadProducts();
+        }
+    }
+}

@@ -1,0 +1,51 @@
+﻿@page "/login"
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>🔐 Iniciar Sesión</h2>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert-error">@errorMessage</div>
+        }
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" @bind="model.Email" placeholder="correo@ejemplo.com" />
+        </div>
+
+        <div class="form-group">
+            <label>Contraseña</label>
+            <input type="password" @bind="model.Password" placeholder="••••••••" />
+        </div>
+
+        <button class="btn-primary" @onclick="HandleLogin" disabled="@isLoading">
+            @if (isLoading) { <span>Entrando...</span> } else { <span>Iniciar Sesión</span> }
+        </button>
+
+        <p class="auth-link">¿No tienes cuenta? <a href="/register">Regístrate aquí</a></p>
+    </div>
+</div>
+
+@code {
+    private LoginModel model = new();
+    private string errorMessage = string.Empty;
+    private bool isLoading = false;
+
+    private async Task HandleLogin()
+    {
+        isLoading = true;
+        errorMessage = string.Empty;
+
+        var success = await AuthService.LoginAsync(model);
+
+        if (success)
+            Navigation.NavigateTo("/products", forceLoad: true);
+        else
+            errorMessage = "Email o contraseña incorrectos";
+
+        isLoading = false;
+    }
+}
