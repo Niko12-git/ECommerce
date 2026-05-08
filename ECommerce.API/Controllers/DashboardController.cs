@@ -16,7 +16,8 @@ public class DashboardController : ControllerBase
         _service = service;
     }
 
-    [HttpGet]
+    // CORRECCIÓN: Cambiamos "{id}" por "stats"
+    [HttpGet("stats")]
     public async Task<IActionResult> Get()
     {
         var dashboard = await _service.GetDashboardAsync();

@@ -13,7 +13,7 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuración CORS
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("BlazorPolicy", policy =>
@@ -26,7 +26,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Base de datos SQLite
+//SQLite
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlite("Data Source=ecommerce.db"));
 
@@ -74,7 +74,6 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        // Serializar enums como texto en lugar de números
         options.JsonSerializerOptions.Converters.Add(
             new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
@@ -113,12 +112,15 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
-app.UseCors("BlazorPolicy");
 app.UseHttpsRedirection();
+app.UseCors("BlazorPolicy");
 
-// IMPORTANTE: Authentication antes que Authorization
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseRouting(); // 1. Primero se define la ruta
 
-app.MapControllers();
+app.UseAuthentication(); // 2. Luego se identifica al usuario
+app.UseAuthorization();  // 3. Luego se revisan los permisos (Roles = "Admin")
+
+app.MapControllers(); // 4. Finalmente se ejecuta el controlador
+// --------------------------------
+
 app.Run();

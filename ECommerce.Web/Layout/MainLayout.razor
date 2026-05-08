@@ -6,14 +6,14 @@
 
 <div class="layout">
     <nav class="navbar">
-        <div class="nav-brand">🛒 ECommerce</div>
+        <div class="nav-brand">ECommerce web</div>
         <div class="nav-links">
             @if (isAuthenticated)
             {
-                <span class="nav-user">👤 @userName (@userRole)</span>
+                <span class="nav-user"> @userName (@userRole)</span>
                 @if (userRole == "Admin")
                 {
-                    <a href="/dashboard">📊 Dashboard</a>
+                    <a href="/dashboard">Dashboard</a>
                     <a href="/products">Productos</a>
                     <a href="/users">Usuarios</a>
                 }
@@ -21,7 +21,7 @@
                 {
                     <a href="/products">Tienda</a>
                 }
-                <a href="/my-orders">Mis Órdenes</a>
+                <a href="/my-orders">Mis órdenes</a>
                 <a href="/cart" class="cart-link">
                     🛒 Carrito
                     @if (cartCount > 0)

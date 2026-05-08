@@ -4,7 +4,7 @@
 @inject NavigationManager Navigation
 
 
-<h2>📊 Panel de Administración</h2>
+<h2>Panel de administración</h2>
 
 @if (isLoading)
 {
@@ -16,7 +16,6 @@ else if (stats is null)
 }
 else
 {
-    <!-- Tarjetas de estadísticas -->
     <div class="stats-grid">
         <div class="stat-card stat-blue">
             <div class="stat-icon">👥</div>
@@ -66,10 +65,10 @@ else
 
     <!-- Órdenes recientes -->
     <div class="card" style="margin-top:2rem">
-        <h3 style="margin-bottom:1rem">🕐 Órdenes Recientes</h3>
+        <h3 style="margin-bottom:1rem">🕐 Órdenes recientes</h3>
         @if (stats.RecentOrders.Count == 0)
         {
-            <p style="color:#888">No hay órdenes aún.</p>
+            <p style="color:#888">No hay órdenes aún</p>
         }
         else
         {
